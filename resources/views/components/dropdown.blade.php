@@ -1,0 +1,1 @@
+<div data-dropdown class="relative"><button data-dropdown-trigger type="button" aria-haspopup="true" aria-expanded="false" class="min-h-11">{{ $trigger ?? 'Actions' }}</button><div data-dropdown-menu hidden class="absolute right-0 z-20 mt-2 min-w-48 rounded-lg border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900">{{ $slot }}</div></div>

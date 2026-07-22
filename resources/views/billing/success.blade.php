@@ -1,0 +1,4 @@
+@extends('layouts.dashboard')
+@section('content')
+<div class="mx-auto max-w-xl py-8"><x-card><div class="text-center"><span class="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"><x-icon name="check"/></span><h1 class="mt-5 text-2xl font-semibold tracking-tight">Paiement en cours de confirmation</h1><p class="mt-3 leading-7 text-slate-500 dark:text-slate-400">Cette page ne constitue pas une preuve de paiement. CentralCloud attend le webhook Stripe signé avant de préparer votre instance.</p><x-button class="mt-6" href="{{ $project ? route('projects.show',$project->uuid) : route('projects.index') }}">{{ $project ? 'Suivre ce CentralPanel' : 'Voir mes CentralPanel' }}</x-button></div></x-card></div>
+@endsection

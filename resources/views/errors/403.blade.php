@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 403') @section('title','Accès non autorisé') @section('message','Votre compte ne dispose pas des permissions nécessaires pour consulter cette page.') @section('actions')<x-button href="{{ auth()->check() ? route('dashboard') : route('home') }}">Retour à l’accueil</x-button>@endsection

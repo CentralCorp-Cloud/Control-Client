@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 503') @section('title','Service temporairement indisponible') @section('message','CentralCloud est en maintenance ou momentanément indisponible. Réessayez dans quelques instants.') @section('actions')<x-button href="{{ url()->current() }}">Réessayer</x-button>@endsection

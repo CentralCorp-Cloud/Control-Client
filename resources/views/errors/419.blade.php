@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 419') @section('title','Session expirée') @section('message','Votre session de sécurité a expiré. Rechargez la page avant de recommencer.') @section('actions')<x-button href="{{ url()->previous() }}">Recharger la page</x-button>@endsection

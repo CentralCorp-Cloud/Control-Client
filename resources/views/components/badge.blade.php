@@ -1,0 +1,1 @@
+@props(['color'=>'slate'])<span {{ $attributes->merge(['class'=>'inline-flex min-h-6 items-center gap-1.5 rounded-full bg-'.$color.'-100 px-2.5 py-0.5 text-xs font-semibold text-'.$color.'-700 dark:bg-'.$color.'-500/15 dark:text-'.$color.'-300']) }}>{{ $slot }}</span>

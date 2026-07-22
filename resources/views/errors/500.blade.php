@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 500') @section('title','Une erreur est survenue') @section('message','La demande n’a pas pu être traitée. Réessayez, puis contactez le support si le problème persiste.') @section('actions')<x-button href="{{ auth()->check() ? route('dashboard') : route('home') }}">Retour à l’accueil</x-button>@endsection

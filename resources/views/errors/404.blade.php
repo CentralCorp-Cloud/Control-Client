@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 404') @section('title','Page introuvable') @section('message','Cette page n’existe plus ou son adresse est incorrecte.') @section('actions')<x-button href="{{ auth()->check() ? route('dashboard') : route('home') }}">Retour à l’accueil</x-button>@endsection

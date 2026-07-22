@@ -1,0 +1,1 @@
+@extends('errors.layout') @section('code','Erreur 429') @section('title','Trop de tentatives rapprochées') @section('message')Cette protection évite les demandes répétées. Réessayez dans environ {{ max(1, (int) ceil(($retryAfter ?? 60) / 60)) }} minute(s).@endsection @section('actions')<x-button href="{{ url()->previous() }}">Retour au CentralPanel</x-button>@endsection
