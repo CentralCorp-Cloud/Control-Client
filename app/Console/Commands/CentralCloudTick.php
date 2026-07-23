@@ -18,7 +18,7 @@ class CentralCloudTick extends Command
         if (! $lock->get()) {
             return self::SUCCESS;
         } try {
-            foreach (['centralcloud:requests:retry', 'centralcloud:nodes:poll', 'centralcloud:operations:poll', 'centralcloud:deployments:sync', 'centralcloud:domains:verify', 'centralcloud:billing:reconcile', 'centralcloud:billing:enforce', 'centralcloud:incidents:refresh'] as $command) {
+            foreach (['centralcloud:enrollments:cleanup', 'centralcloud:enrollments:validate', 'centralcloud:requests:retry', 'centralcloud:nodes:poll', 'centralcloud:operations:poll', 'centralcloud:deployments:sync', 'centralcloud:domains:verify', 'centralcloud:billing:reconcile', 'centralcloud:billing:enforce', 'centralcloud:incidents:refresh'] as $command) {
                 Artisan::call($command);
             } Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-time' => 30, '--tries' => 3]);
         } finally {

@@ -25,6 +25,6 @@ class StripeWebhookTest extends TestCase
         $signature = 't='.$timestamp.',v1='.hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
         for ($i = 0; $i < 2; $i++) {
             $this->call('POST', route('stripe.webhook'), [], [], [], ['HTTP_STRIPE_SIGNATURE' => $signature], $payload)->assertOk();
-        }$this->assertDatabaseCount('stripe_events',1);
+        }$this->assertDatabaseCount('stripe_events', 1);
     }
 }

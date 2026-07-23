@@ -43,7 +43,7 @@ final class AgentEndpointValidator
             }
         }
 
-return false;
+        return false;
     }
 
     private function contains(string $ip, string $network, int $bits): bool
@@ -58,6 +58,6 @@ return false;
             return false;
         }
 
-return $rem === 0 || ((ord($a[$bytes]) & (0xFF << (8 - $rem))) === (ord($n[$bytes]) & (0xFF << (8 - $rem))));
+        return $rem === 0 || ((ord($a[$bytes]) & (0xFF << (8 - $rem))) === (ord($n[$bytes]) & (0xFF << (8 - $rem))));
     }
 }

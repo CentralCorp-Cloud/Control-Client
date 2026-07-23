@@ -48,7 +48,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'admin',
     Route::get('/projects/{project:uuid}', [Admin\ProjectController::class, 'show'])->name('projects.show');
     Route::post('/deployments/{deployment:uuid}/upgrade', [ProjectLifecycleController::class, 'upgrade'])->middleware(['can:manage-infrastructure', 'password.confirm', 'throttle:5,10'])->name('deployments.upgrade');
     Route::delete('/deployments/{deployment:uuid}/soft-delete', [ProjectLifecycleController::class, 'softDelete'])->middleware(['can:manage-infrastructure', 'password.confirm', 'throttle:5,10'])->name('deployments.soft-delete');
+    Route::get('/nodes/claim', [Admin\NodeEnrollmentController::class, 'claim'])->middleware('can:manage-infrastructure')->name('node-enrollments.claim');
+    Route::post('/nodes/claim', [Admin\NodeEnrollmentController::class, 'lookup'])->middleware(['can:manage-infrastructure', 'throttle:node-enrollment-claim'])->name('node-enrollments.lookup');
     Route::resource('nodes', Admin\NodeController::class)->parameters(['nodes' => 'node:uuid'])->except(['edit'])->middleware('can:manage-infrastructure');
+    Route::get('/node-enrollments', [Admin\NodeEnrollmentController::class, 'index'])->middleware('can:manage-infrastructure')->name('node-enrollments.index');
+    Route::get('/node-enrollments/{enrollment:uuid}', [Admin\NodeEnrollmentController::class, 'show'])->middleware('can:manage-infrastructure')->name('node-enrollments.show');
+    Route::get('/node-enrollments/{enrollment:uuid}/status', [Admin\NodeEnrollmentController::class, 'status'])->middleware('can:manage-infrastructure')->name('node-enrollments.status');
+    Route::post('/node-enrollments/{enrollment:uuid}/approve', [Admin\NodeEnrollmentController::class, 'approve'])->middleware(['can:manage-infrastructure', 'password.confirm'])->name('node-enrollments.approve');
+    Route::post('/node-enrollments/{enrollment:uuid}/deny', [Admin\NodeEnrollmentController::class, 'deny'])->middleware(['can:manage-infrastructure', 'password.confirm'])->name('node-enrollments.deny');
+    Route::post('/node-enrollments/{enrollment:uuid}/revoke', [Admin\NodeEnrollmentController::class, 'revoke'])->middleware(['can:manage-infrastructure', 'password.confirm'])->name('node-enrollments.revoke');
+    Route::post('/node-enrollments/{enrollment:uuid}/retry', [Admin\NodeEnrollmentController::class, 'retry'])->middleware(['can:manage-infrastructure', 'password.confirm'])->name('node-enrollments.retry');
+    Route::post('/node-enrollments/automatic', [Admin\NodeEnrollmentController::class, 'automatic'])->middleware(['can:manage-infrastructure', 'password.confirm', 'throttle:3,10'])->name('node-enrollments.automatic');
     Route::get('/operations', [Admin\OperationController::class, 'index'])->name('operations.index');
     Route::get('/operations/{operation:uuid}', [Admin\OperationController::class, 'show'])->name('operations.show');
     Route::resource('plans', Admin\PlanController::class)->except(['show'])->middleware('can:manage-billing');

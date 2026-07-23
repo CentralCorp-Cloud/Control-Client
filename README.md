@@ -43,7 +43,11 @@ php artisan route:list
 - [Sécurité](docs/security.md)
 - [Guide administrateur](docs/admin-guide.md)
 - [Runbooks opérations](docs/operations.md)
+- [Installation automatisée des Nodes](docs/node-enrollment.md)
 
-## Limite d’intégration connue
+## Contrats partagés
 
-Le dépôt public `centralpanel-v2` inspecté ne fournit actuellement ni image OCI, ni commandes `panel:install` / `panel:admin-reset` conformes au contrat du Node Agent. Une image officielle externe, épinglée par digest et conforme aux quatre documents Agent, est requise avant une recette end-to-end réelle. Le Control Plane et sa suite standard utilisent des réponses HTTP Agent mockées.
+Le dépôt voisin `specs/` est normatif pour l’enrôlement, la configuration Agent,
+les manifests signés et le runtime CentralPanel. CentralPanel fournit
+actuellement l’image OCI multi-architecture, le healthcheck `/up`, le stockage
+`/app/storage` et les commandes managées attendues.

@@ -3,11 +3,16 @@
 namespace App\Providers;
 
 use App\Contracts\CnameResolver;
+use App\Contracts\EnrollmentRandomSource;
+use App\Contracts\NodeCertificateIssuer;
 use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\Deployment;
+use App\Models\NodeEnrollment;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\Certificates\LocalCaNodeCertificateIssuer;
+use App\Services\Enrollment\SecureRandomSource;
 use App\Services\NativeCnameResolver;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -26,6 +31,14 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(CnameResolver::class, NativeCnameResolver::class);
+        $this->app->bind(EnrollmentRandomSource::class, SecureRandomSource::class);
+        $this->app->bind(NodeCertificateIssuer::class, function () {
+            if (config('centralcloud.enrollment.certificate_issuer') !== 'local_ca') {
+                throw new \RuntimeException('Unsupported Node certificate issuer.');
+            }
+
+            return app(LocalCaNodeCertificateIssuer::class);
+        });
     }
 
     /**
@@ -62,5 +75,17 @@ class AppServiceProvider extends ServiceProvider
                     ], 429, $headers);
                 });
         });
+        RateLimiter::for('node-enrollment-device', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('node-enrollment-poll', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('node-enrollment-bootstrap', function (Request $request) {
+            $enrollment = $request->route('enrollment');
+            $id = $enrollment instanceof NodeEnrollment ? $enrollment->uuid : (string) $enrollment;
+
+            return Limit::perMinute(60)->by($request->ip().'|'.$id);
+        });
+        RateLimiter::for('node-enrollment-claim', fn (Request $request) => [
+            Limit::perMinutes(10, 5)->by($request->ip()),
+            Limit::perMinutes(10, 5)->by((string) $request->user()?->getAuthIdentifier()),
+        ]);
     }
 }

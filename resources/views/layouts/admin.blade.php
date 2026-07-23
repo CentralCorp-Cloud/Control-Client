@@ -13,7 +13,7 @@
         <div class="mx-2 mt-4 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"><p class="text-xs font-semibold uppercase tracking-[0.12em] text-brand-300">Mode administration</p><p class="mt-1 text-xs text-slate-400">Control Plane</p></div>
         <nav class="mt-5 flex-1 overflow-y-auto" aria-label="Control Plane">
             @php($adminLinks=[
-                ['dashboard','home','Vue d’ensemble'],['users.*','user','Utilisateurs'],['projects.*','server','CentralPanels'],['nodes.*','activity','Nodes'],['operations.*','activity','Opérations'],['plans.*','card','Plans'],['panel-versions.*','server','Versions'],['billing.*','card','Facturation'],['incidents.*','warning','Incidents'],['audit.*','shield','Journal d’audit'],['settings.*','settings','Paramètres']
+                ['dashboard','home','Vue d’ensemble'],['users.*','user','Utilisateurs'],['projects.*','server','CentralPanels'],['nodes.*','activity','Nodes'],['node-enrollments.*','shield','Installations'],['operations.*','activity','Opérations'],['plans.*','card','Plans'],['panel-versions.*','server','Versions'],['billing.*','card','Facturation'],['incidents.*','warning','Incidents'],['audit.*','shield','Journal d’audit'],['settings.*','settings','Paramètres']
             ])
             @foreach($adminLinks as [$pattern,$icon,$label])
                 @php($route = 'admin.'.str_replace('.*','.index',$pattern))

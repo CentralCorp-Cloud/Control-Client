@@ -24,7 +24,7 @@ final class NodeSelectionService
         $disk = (int) Setting::valueFor('scheduler_disk_margin', config('centralcloud.nodes.disk_margin_bytes'));
         $max = (int) config('centralcloud.nodes.maximum_deployments');
 
-        return Node::query()->where('status', NodeStatus::Online->value)->where('scheduling_enabled', true)->where('maintenance', false)->where('last_seen_at', '>=', now()->subMinutes(config('centralcloud.nodes.offline_after_minutes')))->where('memory_available_bytes', '>=', $plan->memory_bytes + $ram)->where('disk_available_bytes', '>=', $disk)->where('deployment_count', '<', $max)->get()->filter(fn (Node $node) => ! $requiresAliases || $node->supports('hostname_aliases'));
+        return Node::query()->whereIn('status', [NodeStatus::Online->value, NodeStatus::Ready->value])->where('scheduling_enabled', true)->where('maintenance', false)->where('last_seen_at', '>=', now()->subMinutes(config('centralcloud.nodes.offline_after_minutes')))->where('memory_available_bytes', '>=', $plan->memory_bytes + $ram)->where('disk_available_bytes', '>=', $disk)->where('deployment_count', '<', $max)->get()->filter(fn (Node $node) => ! $requiresAliases || $node->supports('hostname_aliases'));
     }
 
     public function score(Node $n): float

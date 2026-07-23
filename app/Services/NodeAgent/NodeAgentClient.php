@@ -21,6 +21,11 @@ final class NodeAgentClient
         return $this->request($node, 'GET', '/v1/resources')->json();
     }
 
+    public function ready(Node $node): array
+    {
+        return $this->request($node, 'GET', '/v1/ready')->json();
+    }
+
     public function deployments(Node $node): array
     {
         return $this->request($node, 'GET', '/v1/deployments')->json();

@@ -10,6 +10,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property string $uuid
+ * @property string $agent_node_id
  * @property string $endpoint
  * @property NodeStatus $status
  * @property Carbon|null $last_seen_at
@@ -22,7 +24,7 @@ class Node extends Model
 
     protected function casts(): array
     {
-        return ['status' => NodeStatus::class, 'scheduling_enabled' => 'boolean', 'maintenance' => 'boolean', 'capabilities' => 'array', 'last_seen_at' => 'datetime', 'last_error_at' => 'datetime'];
+        return ['status' => NodeStatus::class, 'scheduling_enabled' => 'boolean', 'maintenance' => 'boolean', 'capabilities' => 'array', 'compatibility' => 'array', 'last_seen_at' => 'datetime', 'last_error_at' => 'datetime', 'installed_at' => 'datetime'];
     }
 
     /** @return HasMany<Deployment, $this> */
@@ -35,6 +37,12 @@ class Node extends Model
     public function operations(): HasMany
     {
         return $this->hasMany(AgentOperation::class);
+    }
+
+    /** @return HasMany<NodeEnrollment, $this> */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(NodeEnrollment::class);
     }
 
     public function isFresh(): bool
