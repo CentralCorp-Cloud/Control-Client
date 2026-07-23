@@ -58,7 +58,7 @@ final class NodeAgentClient
 
     private function request(Node $node, string $method, string $path, ?array $body = null, array $headers = [], array $query = []): Response
     {
-        $request = $this->pending()->baseUrl(rtrim($node->endpoint, '/'))->withHeaders($headers);
+        $request = $this->pending($node)->baseUrl(rtrim($node->endpoint, '/'))->withHeaders($headers);
         if ($query) {
             $path .= '?'.http_build_query($query);
         }
@@ -82,8 +82,23 @@ final class NodeAgentClient
         );
     }
 
-    private function pending(): PendingRequest
+    private function pending(Node $node): PendingRequest
     {
+        if ($node->agent_auth_mode === 'bearer') {
+            if (! is_string($node->agent_token) || strlen($node->agent_token) < 32) {
+                throw new NodeAgentException('agent_auth_not_configured', null, 500, 'Agent bearer authentication is not configured');
+            }
+
+            return Http::acceptJson()
+                ->withToken($node->agent_token)
+                ->connectTimeout(config('centralcloud.agent.connect_timeout'))
+                ->timeout(config('centralcloud.agent.timeout'))
+                ->retry(0, 0)
+                ->withOptions(['verify' => true, 'allow_redirects' => false]);
+        }
+
+        // Legacy nodes keep using the former global mTLS credentials until they
+        // are explicitly re-enrolled or rotated to per-node bearer auth.
         $cert = config('centralcloud.agent.client_cert');
         $key = config('centralcloud.agent.client_key');
         $ca = config('centralcloud.agent.ca_cert');

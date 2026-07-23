@@ -19,11 +19,24 @@ class ApproveNodeEnrollmentRequest extends FormRequest
             'environment' => ['required', 'string', 'max:64'],
             'region' => ['nullable', 'string', 'max:80'],
             'agent_fqdn' => ['required', 'string', 'max:255', 'regex:/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i'],
-            'agent_endpoint' => ['required', 'url:https', 'max:500'],
+            'agent_endpoint' => ['required', 'url:https', 'max:500', function (string $attribute, mixed $value, \Closure $fail): void {
+                $parts = parse_url((string) $value);
+                $expectedHost = strtolower((string) $this->input('agent_fqdn'));
+                if (! is_array($parts)
+                    || strtolower((string) ($parts['host'] ?? '')) !== $expectedHost
+                    || (int) ($parts['port'] ?? 443) !== 443
+                    || isset($parts['user'])
+                    || isset($parts['pass'])
+                    || ! in_array((string) ($parts['path'] ?? ''), ['', '/'], true)
+                    || isset($parts['query'])
+                    || isset($parts['fragment'])) {
+                    $fail('L’endpoint doit être exactement le FQDN Agent en HTTPS sur le port 443.');
+                }
+            }],
             'published_address' => ['nullable', 'ip'],
             'agent_channel' => ['required', Rule::in(['stable', 'beta'])],
             'agent_version' => ['required', 'regex:/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', 'max:64'],
-            'allowed_source_cidrs' => ['required', 'array', 'min:1', 'max:32'],
+            'allowed_source_cidrs' => ['sometimes', 'array', 'max:32'],
             'allowed_source_cidrs.*' => ['required', 'string', 'max:64', function (string $attribute, mixed $value, \Closure $fail): void {
                 [$address, $bits] = array_pad(explode('/', (string) $value, 2), 2, null);
                 $packed = @inet_pton($address);

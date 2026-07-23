@@ -11,7 +11,7 @@ class ValidateNodeEnrollments extends Command
 {
     protected $signature = 'centralcloud:enrollments:validate {--limit=10}';
 
-    protected $description = 'Retry bounded mTLS validation of completed node installations';
+    protected $description = 'Retry bounded HTTPS validation of completed node installations';
 
     public function handle(NodeEnrollmentService $service): int
     {

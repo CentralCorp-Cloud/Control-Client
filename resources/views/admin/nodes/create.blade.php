@@ -19,11 +19,10 @@ sudo bash /tmp/centralcloud-node.sh</code></pre>
             <x-input label="Environnement" name="environment" value="production" required/>
             <x-input label="Région" name="region"/>
             <x-input label="FQDN Agent" name="agent_fqdn" placeholder="node-02.nodes.example.com" required/>
-            <x-input label="Endpoint Agent" name="agent_endpoint" type="url" placeholder="https://node-02.nodes.example.com:9443" required/>
+            <x-input label="Endpoint Agent HTTPS" name="agent_endpoint" type="url" placeholder="https://node-02.nodes.example.com" required/>
             <x-input label="Adresse publiée" name="published_address"/>
             <x-select label="Canal Agent" name="agent_channel"><option value="stable">stable</option><option value="beta">beta</option></x-select>
             <x-input label="Version Agent exacte" name="agent_version" value="{{ config('centralcloud.enrollment.default_agent_version') }}" required/>
-            <div class="sm:col-span-2"><x-input label="CIDR Control Plane autorisé" name="allowed_source_cidrs[]" placeholder="203.0.113.0/24" required/></div>
             <x-input label="Capacité maximale" name="maximum_deployments" type="number" value="50"/>
             <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="initial_maintenance" value="1"> Maintenance initiale</label>
             <div class="sm:col-span-2"><x-button>Créer le token à usage unique</x-button></div>

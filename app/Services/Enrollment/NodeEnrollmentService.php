@@ -110,12 +110,16 @@ final class NodeEnrollmentService
     {
         return DB::transaction(function () use ($configuration): array {
             $token = $this->secrets->token();
+            $agentToken = $this->secrets->token();
             $agentID = (string) Str::uuid();
             $node = Node::create([
                 'uuid' => (string) Str::uuid(),
                 'agent_node_id' => $agentID,
                 'name' => $configuration['name'],
                 'endpoint' => rtrim($configuration['agent_endpoint'], '/'),
+                'agent_auth_mode' => 'bearer',
+                'agent_token' => $agentToken,
+                'agent_token_rotated_at' => now(),
                 'region' => $configuration['region'] ?? null,
                 'environment' => $configuration['environment'],
                 'status' => NodeStatus::Provisioning,
@@ -138,7 +142,7 @@ final class NodeEnrollmentService
                 'published_address' => $configuration['published_address'] ?? null,
                 'agent_channel' => $configuration['agent_channel'],
                 'requested_agent_version' => $configuration['agent_version'],
-                'allowed_source_cidrs' => $configuration['allowed_source_cidrs'],
+                'allowed_source_cidrs' => $configuration['allowed_source_cidrs'] ?? [],
                 'allowed_client_sans' => config('centralcloud.enrollment.allowed_client_sans'),
                 'initial_maintenance' => $configuration['initial_maintenance'] ?? false,
                 'maximum_deployments' => $configuration['maximum_deployments'] ?? null,
@@ -216,12 +220,16 @@ final class NodeEnrollmentService
             if (! in_array($enrollment->status, [NodeEnrollmentStatus::PendingClaim, NodeEnrollmentStatus::AwaitingApproval], true)) {
                 throw new EnrollmentException('invalid_state', 409, 'Enrollment cannot be approved in its current state.');
             }
+            $agentToken = $this->secrets->token();
             $agentID = (string) Str::uuid();
             $node = Node::create([
                 'uuid' => (string) Str::uuid(),
                 'agent_node_id' => $agentID,
                 'name' => $configuration['name'],
                 'endpoint' => rtrim($configuration['agent_endpoint'], '/'),
+                'agent_auth_mode' => 'bearer',
+                'agent_token' => $agentToken,
+                'agent_token_rotated_at' => now(),
                 'region' => $configuration['region'] ?? null,
                 'environment' => $configuration['environment'],
                 'status' => NodeStatus::Provisioning,
@@ -247,7 +255,7 @@ final class NodeEnrollmentService
                 'published_address' => $configuration['published_address'] ?? null,
                 'agent_channel' => $configuration['agent_channel'],
                 'requested_agent_version' => $configuration['agent_version'],
-                'allowed_source_cidrs' => $configuration['allowed_source_cidrs'],
+                'allowed_source_cidrs' => $configuration['allowed_source_cidrs'] ?? [],
                 'allowed_client_sans' => config('centralcloud.enrollment.allowed_client_sans'),
                 'initial_maintenance' => $configuration['initial_maintenance'] ?? false,
                 'maximum_deployments' => $configuration['maximum_deployments'] ?? null,
@@ -269,7 +277,7 @@ final class NodeEnrollmentService
     public function revoke(NodeEnrollment $enrollment): void
     {
         $enrollment->update(['status' => NodeEnrollmentStatus::Revoked, 'revoked_at' => now(), 'bootstrap_token_hash' => null, 'last_activity_at' => now()]);
-        $enrollment->node?->update(['status' => NodeStatus::Offline, 'scheduling_enabled' => false]);
+        $enrollment->node?->update(['status' => NodeStatus::Offline, 'scheduling_enabled' => false, 'agent_token' => null]);
         $this->audit->record('node_enrollment.revoked', $enrollment);
     }
 
@@ -303,6 +311,9 @@ final class NodeEnrollmentService
     public function certificate(NodeEnrollment $enrollment, string $token, string $key, array $payload): array
     {
         return $this->withBootstrap($enrollment, $token, function (NodeEnrollment $locked) use ($key, $payload): array {
+            if ($locked->node?->agent_auth_mode === 'bearer') {
+                throw new EnrollmentException('certificate_not_required', 410, 'Bearer enrollments use the public Traefik HTTPS certificate.');
+            }
             if ($replay = $this->idempotency->replay($locked, 'certificate', $key, $payload)) {
                 return $replay;
             }
@@ -452,6 +463,10 @@ final class NodeEnrollmentService
                 'channel' => $enrollment->agent_channel,
                 'protocol_version' => '1',
                 'manifest_url' => config('centralcloud.enrollment.agent_manifest_url'),
+                'authentication' => [
+                    'mode' => 'bearer',
+                    'token' => $enrollment->node->agent_token,
+                ],
             ],
             'security' => [
                 'allowed_client_sans' => $enrollment->allowed_client_sans,

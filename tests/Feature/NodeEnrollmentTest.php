@@ -71,7 +71,12 @@ class NodeEnrollmentTest extends TestCase
 
         $this->assertSame('approved', $approved['status']);
         $this->assertGreaterThanOrEqual(32, strlen($approved['bootstrap_token']));
+        $this->assertSame('bearer', $approved['agent']['authentication']['mode']);
+        $this->assertGreaterThanOrEqual(32, strlen($approved['agent']['authentication']['token']));
         $this->assertSame(NodeStatus::Provisioning, $enrollment->fresh()->node->status);
+        $this->assertSame('bearer', $enrollment->fresh()->node->agent_auth_mode);
+        $this->assertNotSame($approved['agent']['authentication']['token'], $enrollment->fresh()->node->getRawOriginal('agent_token'));
+        $this->assertArrayNotHasKey('agent_token', $enrollment->fresh()->node->toArray());
         $this->assertSame(1, $enrollment->fresh()->node()->count());
         NodeEnrollment::whereKey($enrollment->id)->update(['last_polled_at' => null]);
         $this->expectExceptionMessage('Bootstrap token was already delivered');
@@ -112,6 +117,7 @@ class NodeEnrollmentTest extends TestCase
         $service = app(NodeEnrollmentService::class);
         $created = $service->createAutomatic($this->configuration());
         $approved = $service->exchangeAutomatic($created['token'], $this->metadata());
+        $created['enrollment']->fresh()->node->update(['agent_auth_mode' => null]);
         $key = (string) Str::uuid();
         $payload = ['csr' => "-----BEGIN CERTIFICATE REQUEST-----\nTEST\n-----END CERTIFICATE REQUEST-----"];
 
@@ -123,7 +129,7 @@ class NodeEnrollmentTest extends TestCase
         $this->assertStringNotContainsString('PRIVATE KEY', json_encode($first));
     }
 
-    public function test_completion_marks_ready_only_after_dashboard_mtls_probe(): void
+    public function test_completion_marks_ready_only_after_dashboard_bearer_https_probe(): void
     {
         $service = app(NodeEnrollmentService::class);
         $created = $service->createAutomatic($this->configuration());
@@ -152,6 +158,7 @@ class NodeEnrollmentTest extends TestCase
         $this->assertSame(NodeStatus::Ready, $node->fresh()->status);
         $this->assertSame(NodeEnrollmentStatus::Ready, $created['enrollment']->fresh()->status);
         $this->assertSame(1, $created['enrollment']->fresh()->node()->count());
+        Http::assertSent(fn ($request): bool => $request->hasHeader('Authorization', 'Bearer '.$approved['agent']['authentication']['token']));
     }
 
     public function test_failed_dashboard_probe_leaves_node_validating(): void
@@ -260,6 +267,7 @@ class NodeEnrollmentTest extends TestCase
         } catch (EnrollmentException $exception) {
             $this->assertSame('invalid_token', $exception->errorCode);
             $this->assertSame(NodeEnrollmentStatus::Revoked, $created['enrollment']->fresh()->status);
+            $this->assertNull($created['enrollment']->fresh()->node->agent_token);
         }
     }
 
@@ -298,6 +306,12 @@ class NodeEnrollmentTest extends TestCase
         $this->assertNull($enrollment->device_code_hash);
         $this->assertNull($enrollment->user_code_hash);
         $this->assertNull($enrollment->bootstrap_token_hash);
+
+        $automatic = app(NodeEnrollmentService::class)->createAutomatic($this->configuration());
+        $automatic['enrollment']->update(['expires_at' => now()->subSecond()]);
+        $this->artisan('centralcloud:enrollments:cleanup')->assertSuccessful();
+        $this->assertSame(NodeEnrollmentStatus::Expired, $automatic['enrollment']->fresh()->status);
+        $this->assertNull($automatic['enrollment']->fresh()->node->agent_token);
     }
 
     public function test_non_administrator_cannot_access_enrollment_admin_pages(): void
@@ -320,9 +334,9 @@ class NodeEnrollmentTest extends TestCase
     {
         return [
             'name' => 'node-02', 'environment' => 'production', 'region' => 'fr-par',
-            'agent_fqdn' => 'node-02.nodes.example.com', 'agent_endpoint' => 'https://node-02.nodes.example.com:9443',
+            'agent_fqdn' => 'node-02.nodes.example.com', 'agent_endpoint' => 'https://node-02.nodes.example.com',
             'published_address' => '203.0.113.42', 'agent_channel' => 'stable', 'agent_version' => '1.2.0',
-            'allowed_source_cidrs' => ['203.0.113.0/24'], 'initial_maintenance' => false, 'maximum_deployments' => 50,
+            'initial_maintenance' => false, 'maximum_deployments' => 50,
         ];
     }
 }

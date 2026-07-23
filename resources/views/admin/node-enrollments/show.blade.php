@@ -49,11 +49,10 @@ runcmd:
                 <x-input label="Environnement" name="environment" value="production" required/>
                 <x-input label="Région" name="region"/>
                 <x-input label="FQDN Agent" name="agent_fqdn" required/>
-                <x-input label="Endpoint Agent" name="agent_endpoint" type="url" placeholder="https://node.example.com:9443" required/>
+                <x-input label="Endpoint Agent HTTPS" name="agent_endpoint" type="url" placeholder="https://node.example.com" required/>
                 <x-input label="Adresse publiée" name="published_address"/>
                 <x-select label="Canal" name="agent_channel"><option>stable</option><option>beta</option></x-select>
                 <x-input label="Version Agent" name="agent_version" value="{{ config('centralcloud.enrollment.default_agent_version') }}" required/>
-                <div class="sm:col-span-2"><x-input label="CIDR Control Plane" name="allowed_source_cidrs[]" required/></div>
                 <x-input label="Capacité maximale" name="maximum_deployments" type="number" value="50"/>
                 <label class="flex items-center gap-2"><input type="checkbox" name="initial_maintenance" value="1"> Maintenance initiale</label>
                 <div class="flex gap-3 sm:col-span-2"><x-button>Approuver</x-button></div>

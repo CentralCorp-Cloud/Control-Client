@@ -1,6 +1,12 @@
 # Intégration Node Agent
 
-`NodeAgentClient` centralise mTLS, CA, timeouts et absence de redirects. L’ajout d’un Node valide URL/port/CIDR, appelle `/v1/health` et `/v1/resources`, compare les deux `node_id`, puis enregistre l’identité. Toute divergence future désactive le scheduling et ouvre un incident critique.
+`NodeAgentClient` centralise le jeton Bearer chiffré propre à chaque Node, la
+vérification TLS publique, les timeouts et l’absence de redirects. Les nouveaux
+Nodes sont ajoutés par l’enrôlement automatisé. Le Dashboard appelle
+`/v1/health` et `/v1/resources`, compare les deux `node_id`, puis enregistre
+l’identité. Toute divergence future désactive le scheduling et ouvre un incident
+critique. Les identifiants mTLS globaux restent uniquement pour les anciens
+Nodes dont `agent_auth_mode` est vide.
 
 Endpoints intégrés : health, resources, liste/détail deployments, create, start, stop, restart, upgrade, admin-reset, soft delete, purge-token/purge, logs et opérations. `/metrics` n’est pas utilisé comme API Control Plane.
 

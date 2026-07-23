@@ -31,7 +31,7 @@ return [
         'bootstrap_ttl' => (int) env('CENTRALCLOUD_ENROLLMENT_BOOTSTRAP_TTL', 5400),
         'hash_key' => env('CENTRALCLOUD_ENROLLMENT_HASH_KEY'),
         'default_agent_channel' => env('CENTRALCLOUD_DEFAULT_AGENT_CHANNEL', 'stable'),
-        'default_agent_version' => env('CENTRALCLOUD_DEFAULT_AGENT_VERSION', '1.2.0'),
+        'default_agent_version' => env('CENTRALCLOUD_DEFAULT_AGENT_VERSION', '1.3.0'),
         'agent_manifest_url' => env('CENTRALCLOUD_AGENT_MANIFEST_URL'),
         'release_public_key' => env('CENTRALCLOUD_RELEASE_PUBLIC_KEY'),
         'certificate_issuer' => env('CENTRALCLOUD_CERTIFICATE_ISSUER', 'local_ca'),

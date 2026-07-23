@@ -22,9 +22,11 @@ class Node extends Model
 
     protected $guarded = [];
 
+    protected $hidden = ['agent_token'];
+
     protected function casts(): array
     {
-        return ['status' => NodeStatus::class, 'scheduling_enabled' => 'boolean', 'maintenance' => 'boolean', 'capabilities' => 'array', 'compatibility' => 'array', 'last_seen_at' => 'datetime', 'last_error_at' => 'datetime', 'installed_at' => 'datetime'];
+        return ['status' => NodeStatus::class, 'scheduling_enabled' => 'boolean', 'maintenance' => 'boolean', 'capabilities' => 'array', 'compatibility' => 'array', 'agent_token' => 'encrypted', 'agent_token_rotated_at' => 'datetime', 'last_seen_at' => 'datetime', 'last_error_at' => 'datetime', 'installed_at' => 'datetime'];
     }
 
     /** @return HasMany<Deployment, $this> */

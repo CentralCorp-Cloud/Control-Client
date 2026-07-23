@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<x-page-header title="Installations de Nodes" subtitle="Enrôlements, progression et validation mTLS">
+<x-page-header title="Installations de Nodes" subtitle="Enrôlements, progression et validation HTTPS">
     <a href="{{ route('admin.nodes.create') }}"><x-button>Ajouter un Node</x-button></a>
 </x-page-header>
 <x-card>

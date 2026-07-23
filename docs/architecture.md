@@ -6,8 +6,8 @@ flowchart TD
     A[Administrateur] --> C
     S[Stripe] -->|webhooks signés| C
     C --> M[(MySQL / MariaDB métier)]
-    C -->|HTTPS + mTLS| N1[Node Agent A]
-    C -->|HTTPS + mTLS| N2[Node Agent B]
+    C -->|HTTPS + Bearer par Node| N1[Node Agent A]
+    C -->|HTTPS + Bearer par Node| N2[Node Agent B]
     N1 --> D1[Docker + Traefik]
     N1 --> P1[(PostgreSQL CentralPanel)]
     N1 --> Q1[(SQLite Agent)]

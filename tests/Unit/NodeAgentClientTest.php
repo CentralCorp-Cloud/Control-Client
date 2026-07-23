@@ -20,6 +20,32 @@ class NodeAgentClientTest extends TestCase
         Http::assertSent(fn (Request $r) => $r->url() === 'https://node.example/v1/health');
     }
 
+    public function test_bearer_node_uses_its_own_encrypted_token(): void
+    {
+        $token = str_repeat('n', 48);
+        $node = new Node(['endpoint' => 'https://node.example', 'agent_auth_mode' => 'bearer', 'agent_token' => $token]);
+        Http::fake(['https://node.example/v1/health' => Http::response(['status' => 'ok'])]);
+
+        app(NodeAgentClient::class)->health($node);
+
+        Http::assertSent(fn (Request $request): bool => $request->hasHeader('Authorization', 'Bearer '.$token));
+    }
+
+    public function test_bearer_node_without_token_fails_before_network_request(): void
+    {
+        Http::fake();
+        $node = new Node(['endpoint' => 'https://node.example', 'agent_auth_mode' => 'bearer']);
+
+        try {
+            app(NodeAgentClient::class)->health($node);
+            $this->fail('Exception expected');
+        } catch (NodeAgentException $exception) {
+            $this->assertSame('agent_auth_not_configured', $exception->agentCode);
+        }
+
+        Http::assertNothingSent();
+    }
+
     public function test_capacity_error_is_mapped_without_exposing_agent_message(): void
     {
         $node = new Node(['endpoint' => 'https://node.example']);

@@ -8,7 +8,10 @@ Pour accepter les domaines personnalisés, déployer d’abord une version Agent
 
 ## Node offline ou identité changée
 
-Consulter l’incident et le correlation ID, vérifier réseau/mTLS puis relancer health. Ne jamais réactiver le scheduling si `node_id` diffère. Aucun déplacement inter-Node automatique n’existe en V1.
+Consulter l’incident et le correlation ID, vérifier le DNS, le certificat HTTPS
+Traefik et le jeton du Node, puis relancer health. Ne jamais réactiver le
+scheduling si `node_id` diffère. Aucun déplacement inter-Node automatique
+n’existe en V1.
 
 ## Deployment failed
 

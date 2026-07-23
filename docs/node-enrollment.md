@@ -4,34 +4,23 @@
 
 Set the enrollment variables from `.env.example`. Production requires a random
 `CENTRALCLOUD_ENROLLMENT_HASH_KEY`, an exact signed Agent manifest URL and its
-Ed25519 public key, Control Plane source CIDRs, and separate Node server CA and
-Control Plane client CA files.
+Ed25519 public key. No Dashboard egress CIDR or private PKI is required for new
+Nodes: each enrollment creates an independent Agent Bearer token, encrypted in
+the `nodes` table with `APP_KEY`.
 
 The normative Agent release public key is
 `specs/agent-release-public-key.txt`; keep the Dashboard value synchronized
 with it during an intentional key rotation.
 
-For a development CA:
-
-```sh
-umask 077
-openssl ecparam -name prime256v1 -genkey -noout -out node-ca.key
-openssl req -x509 -new -key node-ca.key -sha256 -days 3650 \
-  -subj "/CN=CentralCloud development Node CA" -out node-ca.crt
-chmod 0600 node-ca.key
-```
-
-The PHP process must own the CA private key. Never store it in the database or
-repository. Production should use an external signer implementing
-`NodeCertificateIssuer`.
+The old CA settings and `NodeCertificateIssuer` remain available only to
+migrate existing mTLS Nodes. Do not generate a CA for a new Bearer deployment.
 
 ## Interactive approval
 
 Run the two-line bootstrap shown under **Admin → Nodes → Add**. Enter the
 displayed code at `/admin/nodes/claim`, verify detected hardware and addresses,
-then select exact Agent version, endpoint, region, environment and Control
-Plane CIDRs. Admin 2FA, infrastructure permission and password confirmation are
-required.
+then select exact Agent version, HTTPS endpoint, region and environment. Admin
+2FA, infrastructure permission and password confirmation are required.
 
 ## Automatic mode
 
@@ -46,11 +35,11 @@ delete it after exchange.
 15-minute webcron. Revocation invalidates bootstrap access and disables
 scheduling.
 
-Initial certificates are valid for `CENTRALCLOUD_NODE_CERTIFICATE_DAYS`.
-Rotation uses a new locally generated CSR and the same validation rules; until
-an automated rotation endpoint is introduced, perform rotation during a
-maintenance window and keep the previous certificate for rollback.
+Revocation also deletes the Dashboard copy of the per-node Agent token.
+Re-enrollment creates a new independent token. A future rotation action can use
+the existing `agent_token_rotated_at` field without changing node identity.
 
-`agent_unreachable` leaves the Node in `VALIDATING`. Check DNS, port 9443,
-Control Plane egress CIDRs, firewall rules, client certificate SAN and both CA
-chains, then use the retry action.
+`agent_unreachable` leaves the Node in `VALIDATING`. Check that the Node FQDN
+resolves publicly, Traefik obtained a valid certificate on 443, the internal
+9443 route is active, and the token hash file is readable by the Agent; then use
+the retry action.

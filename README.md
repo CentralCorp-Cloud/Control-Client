@@ -7,7 +7,7 @@ CentralCloud est le site client, le Control Plane et le back-office d’exploita
 - Laravel 13, PHP 8.3+, Blade, Fortify et Cashier Stripe
 - Tailwind CSS 4, Alpine.js et Vite
 - MySQL/MariaDB, sessions/cache/queue database
-- HTTPS + mTLS vers CentralCloud Node Agent
+- HTTPS + jeton Bearer propre à chaque CentralCloud Node Agent
 - Scheduler CLI ou WebCron mutualisé, sans Redis ni worker permanent
 
 ## Démarrage local
